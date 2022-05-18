@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json())
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.mn62n.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 async function run() {
@@ -24,12 +24,28 @@ async function run() {
             const cursor = taskCollection.find(query);
             const products = await cursor.toArray();
             res.send(products)
-          })
+        })
+        //add task
+        app.post('/addTask', async (req, res) => {
+            const newTask = req.body
+            const result = await taskCollection.insertOne(newTask)
+            res.send(result)
+        })
+
+        // Delete task
+        app.delete('/tasks/:id',async(req,res)=>{
+            const id=req.params.id
+            const query={_id: ObjectId(id)};
+            const result = await taskCollection.deleteOne(query)
+            res.send(result)
+        })
+
+
     }
     finally {
 
     }
-   
+
 }
 run().catch(console.dir)
 
